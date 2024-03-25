@@ -1,77 +1,80 @@
 Instructions for Using openFDA API:
 
-[openFDA]
-base_url = https://api.fda.gov
-api_key = YOUR_OPENFDA_API_KEY
+Description:
+openFDA provides APIs to access FDA data on drugs, devices, and foods.
 
-# openFDA endpoint configurations
-[endpoints]
-drug_label_search = 
-    method = GET
-    path = /drug/label.json
-    description = Search for drug labels.
-    details = This endpoint allows you to search for drug labels by specifying search terms. It returns information about drugs approved by the FDA, including their labels, warnings, and other relevant details.
-    parameters = 
-        search = string
-            description = The search term to query for drug labels.
-        limit = integer
-            description = Limits the number of results returned. Default is 10.
-        skip = integer
-            description = Skips the specified number of results. Useful for pagination.
+Endpoint Descriptions:
+1. Drug Label Search:
+   - Search for drug labels.
+   
+2. Food Enforcement Reports:
+   - Search for food enforcement reports including recalls and safety alerts.
+   
+3. Food Adverse Events:
+   - Search for reports of adverse events related to food products.
+   
+4. Drug Enforcement Reports:
+   - Search for drug enforcement reports including recalls and safety alerts.
 
-food_enforcement_reports = 
-    method = GET
-    path = /food/enforcement.json
-    description = Search for food enforcement reports including recalls and safety alerts.
-    details = This endpoint provides access to reports of enforcement actions related to food, including recalls, safety alerts, and import alerts issued by the FDA. It allows you to search for specific enforcement actions based on various criteria.
-    parameters = 
-        search = string
-            description = The search term to query for food enforcement reports.
-        limit = integer
-            description = Limits the number of results returned. Default is 10.
-        skip = integer
-            description = Skips the specified number of results. Useful for pagination.
+5. Drug Adverse Event Reports:
+   - The openFDA drug adverse event API returns data that has been collected from the FDA Adverse Event Reporting System (FAERS), a database that contains information on adverse event and medication error         reports submitted to FDA.
 
-food_adverse_events = 
-    method = GET
-    path = /food/event.json
-    description = Search for reports of adverse events related to food products (hypothetical endpoint).
-    details = This hypothetical endpoint is intended to provide access to reports of adverse events related to food products. While not currently available, it could potentially offer valuable insights into food safety issues and adverse reactions reported by consumers.
-    parameters = 
-        search = string
-            description = The search term to query for adverse events related to food products.
-        limit = integer
-            description = Limits the number of results returned. Default is 10.
-        skip = integer
-            description = Skips the specified number of results. Useful for pagination.
+HTTP Methods:
+- All endpoints support the GET method.
 
-drug_enforcement_reports = 
-    method = GET
-    path = /drug/enforcement.json
-    description = Search for drug enforcement reports including recalls and safety alerts.
-    details = This endpoint provides access to reports of enforcement actions related to drugs, including recalls, safety alerts, and import alerts issued by the FDA. It allows you to search for specific enforcement actions based on various criteria.
-    parameters = 
-        search = string
-            description = The search term to query for drug enforcement reports.
-        limit = integer
-            description = Limits the number of results returned. Default is 10.
-        skip = integer
-            description = Skips the specified number of results. Useful for pagination.
+Endpoint Paths:
+1. /drug/label.json
+2. /food/enforcement.json
+3. /food/event.json
+4. /drug/enforcement.json
+5. /drug/event.json
 
-Instructions for Using PubMed API:
-[PubMed]
-base_url = https://pubmed.ncbi.nlm.nih.gov/
-email = YOUR_EMAIL_FOR_PUBMED_API
+Parameters:
+- drug_label_search:
+  - search (string): Search term
+  - limit (integer): Limit number of results
+  
+- food_enforcement_reports:
+  - search (string): Search term, such as a product name or reason for enforcement
+  - limit (integer): Limit number of results
+  
+- food_adverse_events:
+  - search (string): Search term, such as a specific food product or symptom
+  - limit (integer): Limit number of results
+  
+- drug_enforcement_reports:
+  - search (string): Search term, such as a product name or reason for enforcement
+  - limit (integer): Limit number of results
 
-[PubMed_endpoints]
-search_articles = 
-    description = Search for articles in the PubMed database.
-    method = GET
-    path = /search/
-    parameters = 
-        query = string
-            description = The search query.
-        page = integer
-            description = The page number of results.
-        items_per_page = integer
-            description = Number of items per page.
+- drug_adverse_events:
+  - search (string): Search term, such as patient reactions
+  - limit (integer): Limit number of results
+
+Examples to show the use of the above mentioned API's are: 
+
+“find publications from 2022-2023 in the journal Nature related to zika virus” 
+Desired response:
+https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=(%22Nature%22[Journal])+AND+%22zika+virus%22[Title/Abstract]+AND+(%222022/01/01%22[Date+-+Publication]+:%222023/12/31%22[Date+-+Publication])&retmax=100&usehistory=y
+
+"Search for all records in food enforcement report with report_date between Jan 01, 2023 and Dec 31, 2023 and limit the results to 10"
+Desired Response: 
+https://api.fda.gov/food/enforcement.json?search=report_date:[20040101+TO+20131231]&limit=10
+
+"search for all records where products.industry_code (FDA industry code) contains 23 (Nuts/Edible Seed)."
+Desired Response: 
+https://api.fda.gov/food/event.json?search=products.industry_code:23
+
+"Search for an adverse event report with a drug from a certain pharmacologic class and records received date should be between Jan 01, 2023 and Dec 31, 2023. Limit the result to 1" 
+Desired Response:
+https://api.fda.gov/drug/event.json?search=patient.drug.openfda.pharm_class_epc:"nonsteroidal+anti-inflammatory+drug"&limit=1
+
+"count the field openfda.product_type (product type)"
+Desired Response: 
+https://api.fda.gov/drug/label.json?count=openfda.product_type.exact
+
+"count how many enforcement reports were for voluntary vs. FDA-mandated recalls."
+Desired Response: 
+https://api.fda.gov/drug/enforcement.json?count=voluntary_mandated.exact
+
+
+
