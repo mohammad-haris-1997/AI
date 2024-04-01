@@ -1,14 +1,18 @@
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from supabase import create_client
-from data import determine_endpoint, open_fda_question_process, standalone_question_process
-from langchain_community.vectorstores.supabase import SupabaseVectorStore
-from langchain_openai import OpenAIEmbeddings, OpenAI,ChatOpenAI
-from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser
-# from langchain_core.runnables import RunnableSequence, RunnablePassthrough
-# from langchain.chains import create_structured_output_runnable
+import re
 import aiofiles
 import asyncio
+from supabase import create_client
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_community.vectorstores.supabase import SupabaseVectorStore
+from langchain_openai import OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings, OpenAI,ChatOpenAI
+from langchain_core.output_parsers import StrOutputParser
+from data import determine_endpoint, open_fda_question_process, standalone_question_process
+import re
+import xml.etree.ElementTree as ET
+import requests
+from pprint import pprint
 
 openaiapikey = "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"
 sbapikey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6eHp1YXpzcHhqdGZ3ZXJvcWNnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDcyNTQ1OTYsImV4cCI6MjAyMjgzMDU5Nn0.BcbuKaBsdYcPta5GlVXQ8Wa9RSqFTtLDWAouG21Csfw'
@@ -21,17 +25,13 @@ async def process_text_file(path):
             text = await file.read()
             splitter = RecursiveCharacterTextSplitter(chunk_size=1000)
             output = splitter.create_documents([text])
-            return output  # Return the processed output
+            return output  
     except Exception as err:
         print('Error reading file:', err)
         raise
 
-        
-    except Exception as err:
-        print('Error processing standalone question:', err)
-        raise err
-
 async def main():
+    llm1 = ChatOpenAI(model="gpt-4-0125-preview", temperature=0, openai_api_key =openaiapikey)
     file_path = '/Users/mohammadharis/Downloads/sample.txt'
 
     try:
@@ -44,18 +44,79 @@ async def main():
             table_name='documents'
         )
         
-        question = 'who is rafel nadal?'
+        question = "who is robert downey Jr?"
 
-        endpoint = determine_endpoint(question)
-        from pprint import pprint
-        if endpoint:
-            pprint("From Endpoint")
-            question_response = open_fda_question_process(question, endpoint)
-            pprint(question_response)
+        prompt_1 = """For the following user query, you need to find out if it is best answered directly, or using one of the two available external RAG tools which are API connections to OpenFDA and PubMed."\n"
+                                Your reply should contain no verbose but consist of only one word without quotes which is one of the 3 mentioned choices:"\n"
+                                1. Answering directly: Your response should be: “<direct>" "\n"
+                                2. Use of OpenFDA: Your response should be: “<openfda>" "\n"
+                                3. Use of PubMed: Your response should be: “<pubmed>" "\n"
+                                Here's the original user query: {question}
+                               """    
+        
+        response_type_prompt = ChatPromptTemplate.from_template(prompt_1)
+        chain1 = ( response_type_prompt| llm1 | StrOutputParser())
+        chain1_result = chain1.invoke({"question": question})
+        print(chain1_result)
+        if "<pubmed>" in chain1_result or "<openfda>" in chain1_result:
+            prompt_2 = """  You are trying to automate a system that tries to help a user to operate the PubMed or OpenFDA database system. For a given user question, you should reply with a computed API request URL that best reflects the user intent. Do NOT include any verbose, answer ONLY with the computed API request URL
+                            Examples for other cases to show the use of the API are: 
+                            "Please generate a request API URL for pubmed id - 32607962"
+                            Desired Response: https://pubmed.ncbi.nlm.nih.gov/32607962/
+                            “find publications from 2022-2023 in the journal Nature related to zika virus”
+                            Desired response: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=(%22Nature%22[Journal])+AND+%22zika+virus%22[Title/Abstract]+AND+(%222022/01/01%22[Date+-+Publication]+:%222023/12/31%22[Date+-+Publication])&retmax=100&usehistory=y
+                            What API request URL to PubMed or OpenFda could best help to answer the following question: {question}. """
+            
+            response_type_prompt1 = ChatPromptTemplate.from_template(prompt_2)
+            chain2 = (response_type_prompt1 | llm1 | StrOutputParser())
+            chain2_result = chain2.invoke({"question":question})
+
+            def is_xml_content(content):
+                return content.strip().startswith("<") and content.strip().endswith(">")
+            
+            def extract_all_elements_from_xml(url):
+                try:
+                    response = requests.get(url)
+                    if response.status_code == 200:
+                        if is_xml_content(response.text) == True:
+                            root = ET.fromstring(response.content)
+                            elements= {}
+                            for element in root.iter():
+                                if element.tag == "IdList":
+                                    id_list = [id_element.text.strip() for id_element in element.findall("Id")]
+                                    if len(id_list) > 1:
+                                        elements[element.tag] = id_list
+                                    else:
+                                        return elements
+                                else:
+                                    elements[element.tag] = element.text.strip() if element.text else None
+                                    for key, value in element.attrib.items():
+                                        elements[f"{element.tag}_attribute_{key}"] = value.strip() if value else None
+                            return elements
+                        else:
+                            return None
+                    else:
+                        return None
+                except Exception as e:
+                    return None
+            
+            url = chain2_result
+            all_elements = extract_all_elements_from_xml(url)
+            # print(all_elements)
+            if all_elements:
+                prompt_3 = """I issued the API requests and obtained the results {all_elements}. Please print all the elements in a new line along with its contents such that it is easily understood by the user"""   
+            
+                response_type_prompt2 = ChatPromptTemplate.from_template(prompt_3)
+                chain3 = (response_type_prompt2 | llm1 | StrOutputParser())
+                chain3_result = chain3.invoke({"all_elements":all_elements})
+                print(chain3_result)
+            else:
+                print(chain2_result)
+
         else:
-            pprint("From document / LLM")
             resp = standalone_question_process(question)
             pprint(resp)
+
 
     except Exception as err:
         print('Error in main function:', err)
