@@ -44,7 +44,7 @@ async def main():
             table_name='documents'
         )
         
-        question = "who is robert downey Jr?"
+        question = "What research has been conducted on antibody-drug conjugates for cancer treatment since 2022?"
 
         prompt_1 = """For the following user query, you need to find out if it is best answered directly, or using one of the two available external RAG tools which are API connections to OpenFDA and PubMed."\n"
                                 Your reply should contain no verbose but consist of only one word without quotes which is one of the 3 mentioned choices:"\n"
@@ -99,16 +99,50 @@ async def main():
                         return None
                 except Exception as e:
                     return None
+                
+            def extract_all_elements_from_json(url):
+                try:
+                    response = requests.get(url)
+                    if response.status_code == 200:
+                        json_data = response.json()
+                        if json_data:  # Check if JSON data is not empty
+                            elements = {}
+                            extract_elements(json_data, elements)
+                            return elements
+                        else:
+                            return None
+                    else:
+                        return None
+                except Exception as e:
+                    return None
+
+            def extract_elements(data, elements, parent_key=""):
+                if isinstance(data, dict):
+                    for key, value in data.items():
+                        new_key = f"{parent_key}_{key}" if parent_key else key
+                        if isinstance(value, (dict, list)):
+                            extract_elements(value, elements, new_key)
+                        else:
+                            elements[new_key] = value.strip() if isinstance(value, str) else value
+                elif isinstance(data, list):
+                    for i, item in enumerate(data):
+                        new_key = f"{parent_key}_{i}" if parent_key else str(i)
+                        if isinstance(item, (dict, list)):
+                            extract_elements(item, elements, new_key)
+                        else:
+                            elements[new_key] = item.strip() if isinstance(item, str) else item
             
             url = chain2_result
             all_elements = extract_all_elements_from_xml(url)
-            # print(all_elements)
-            if all_elements:
-                prompt_3 = """I issued the API requests and obtained the results {all_elements}. Please print all the elements in a new line along with its contents such that it is easily understood by the user"""   
+            extracted_data = extract_all_elements_from_json(url)
+            print(all_elements)
+
+            if all_elements or extracted_data:
+                prompt_3 = """I issued the API requests and obtained the results either in {all_elements} or {extracted_data}. Please print all the elements in a new line along with its contents such that it is easily understood by the user"""   
             
                 response_type_prompt2 = ChatPromptTemplate.from_template(prompt_3)
                 chain3 = (response_type_prompt2 | llm1 | StrOutputParser())
-                chain3_result = chain3.invoke({"all_elements":all_elements})
+                chain3_result = chain3.invoke({"all_elements":all_elements,"extracted_data": extracted_data })
                 print(chain3_result)
             else:
                 print(chain2_result)
