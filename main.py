@@ -135,7 +135,7 @@ async def main():
             url = chain2_result
             all_elements = extract_all_elements_from_xml(url)
             extracted_data = extract_all_elements_from_json(url)
-            print(all_elements)
+            #print(all_elements)
 
             if all_elements or extracted_data:
                 prompt_3 = """I issued the API requests and obtained the results either in {all_elements} or {extracted_data}. Please print all the elements in a new line along with its contents such that it is easily understood by the user"""   
