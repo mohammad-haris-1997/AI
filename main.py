@@ -2,13 +2,13 @@ import re
 import aiofiles
 import asyncio
 from supabase import create_client
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter             
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.vectorstores.supabase import SupabaseVectorStore
 from langchain_openai import OpenAIEmbeddings
 from langchain_openai import OpenAIEmbeddings, OpenAI,ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
-from data import determine_endpoint, open_fda_question_process, standalone_question_process
+from data1 import standalone_question_process
 import re
 import xml.etree.ElementTree as ET
 import requests
@@ -35,7 +35,7 @@ async def main():
     file_path = '/Users/mohammadharis/Downloads/sample.txt'
 
     try:
-        output = await process_text_file(file_path)
+        output = await process_text_file(file_path)                             
         
         SupabaseVectorStore.from_documents(
             output,
@@ -44,7 +44,7 @@ async def main():
             table_name='documents'
         )
         
-        question = "What research has been conducted on antibody-drug conjugates for cancer treatment since 2022?"
+        question = "Please explain how can we mitigate loan discrimination by age?"
 
         prompt_1 = """For the following user query, you need to find out if it is best answered directly, or using one of the two available external RAG tools which are API connections to OpenFDA and PubMed."\n"
                                 Your reply should contain no verbose but consist of only one word without quotes which is one of the 3 mentioned choices:"\n"
@@ -54,7 +54,7 @@ async def main():
                                 Here's the original user query: {question}
                                """    
         
-        response_type_prompt = ChatPromptTemplate.from_template(prompt_1)
+        response_type_prompt = ChatPromptTemplate.from_template(prompt_1)        
         chain1 = ( response_type_prompt| llm1 | StrOutputParser())
         chain1_result = chain1.invoke({"question": question})
         print(chain1_result)
