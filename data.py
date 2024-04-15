@@ -37,7 +37,7 @@ def standalone_question_process(question):
             print("Intermediate result:", input_data)
             return input_data 
     
-        standalone_question_chain = (standalone_question_prompt | llm | StrOutputParser())
+        standalone_question_chain = (standalone_question_prompt| llm | StrOutputParser())
 
         retriever_chain = (retriever| combinedocuments | llm |StrOutputParser())
 
@@ -50,7 +50,19 @@ def standalone_question_process(question):
         final_input = {"context": context, "question": question}
         response = answer_chain.invoke(final_input) 
 
-        return response
+        prompt_5 = """ Here is the answer intended for the question: {question}. Answer generated was: {response}. Please Check the answer carefully for correctness, style, and efficiency, and give constructive criticism for how to improve it."""
+
+        response_type_prompt4 = ChatPromptTemplate.from_template(prompt_5)
+        chain5 = (response_type_prompt4 | llm | StrOutputParser())
+        chain5_result = chain5.invoke({"question":question, "response":response})
+        print(chain5_result)
+        
+        prompt_6 = """Based on the previous given answer: {response} and criticism you have provided :{chain5_result}. Please generate the response again."""
+        response_type_prompt5 = ChatPromptTemplate.from_template(prompt_6)
+        chain6 = (response_type_prompt5|print_result| llm | StrOutputParser())
+        chain6_result = chain6.invoke({"response":response, "chain5_result":chain5_result})
+
+        return chain6_result
         
     except Exception as err:
         print('Error processing standalone question:', err)
