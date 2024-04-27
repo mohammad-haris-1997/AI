@@ -32,7 +32,7 @@ async def process_text_file(path):
 
 async def main():
     llm1 = ChatOpenAI(model="gpt-4-0125-preview", temperature=0, openai_api_key =openaiapikey)
-    file_path = '/Users/mohammadharis/Downloads/sample.txt'
+    file_path = '/Users/mohammadharis/Downloads/lion.txt'
 
     try:
         output = await process_text_file(file_path)                             
@@ -44,7 +44,7 @@ async def main():
             table_name='documents'
         )
         
-        question = "Please explain how can we mitigate loan discrimination by age?"
+        question = "When does female lion first give birth?"
 
         prompt_1 = """For the following user query, you need to find out if it is best answered directly, or using one of the two available external RAG tools which are API connections to OpenFDA and PubMed."\n"
                                 Your reply should contain no verbose but consist of only one word without quotes which is one of the 3 mentioned choices:"\n"
