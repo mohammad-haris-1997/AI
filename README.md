@@ -4,6 +4,8 @@
 This project aims to build an Artificial Intelligence (AI) and Large Language Model (LLM) system that can retrieve complex and dynamic biomedical data from external sources such as databases and APIs like OpenFDA and PubMed. Efficient biomedical data retrieval is important for healthcare and scientific research. This project aims to address the challenges of data retrieval in the Biomedical sector. Data retrieval within this sector is often characterized by its complex, dynamic, and constantly changing nature. The LLM system will leverage Natural Language Query Processing (NLQP), Retrieval Augmentation Generation (RAG) and LLM models such as GPT-4 in order simplify user interactions as well as streamline and simplify the data retrieval process. The system provides an intuitive chatbot interface for users to input their questions using everyday human language.
 
 
+<img width="1055" alt="Screenshot 2024-04-28 at 9 52 31 PM" src="https://github.com/mohammad-haris-1997/Capstone/assets/163910277/d0f8da57-78e3-47f4-b02e-7a13e35bee7d">
+
 
 
 ## Acknowledgements
