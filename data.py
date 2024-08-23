@@ -6,8 +6,8 @@ from supabase import create_client
 
 
 openaiapikey = "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"
-sbapikey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6eHp1YXpzcHhqdGZ3ZXJvcWNnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDcyNTQ1OTYsImV4cCI6MjAyMjgzMDU5Nn0.BcbuKaBsdYcPta5GlVXQ8Wa9RSqFTtLDWAouG21Csfw'
-sburl = 'https://lzxzuazspxjtfweroqcg.supabase.co'
+sbapikey = 'SUPABASE_KEY '
+sburl = 'SUPABASE_URL '
 supabase_client = create_client(sburl, sbapikey)
 
 
