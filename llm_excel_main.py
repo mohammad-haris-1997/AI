@@ -10,7 +10,7 @@ import os
 from dotenv import load_dotenv
 from langchain_community.vectorstores.supabase import SupabaseVectorStore
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
-from data6_1 import standalone_question_process
+from llm_excel_similarity import standalone_question_process
 import openpyxl
 
 load_dotenv()
