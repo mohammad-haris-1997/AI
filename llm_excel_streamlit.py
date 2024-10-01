@@ -28,7 +28,7 @@ def validate_file(file_path):
 file_path = st.text_input("Enter the file path for the Excel file", value="", placeholder="e.g. /path/to/your/excel.xlsx")
 
 # Text input for sheet name
-sheet_name = st.text_input("Enter the sheet name", value="", placeholder="e.g. Sheet1")
+sheet_name = st.text_input("Enter the sheet name", value="")
 
 # Text input for Word document data
 word_file = st.text_input("Enter the file path for the Word document (optional)", value="", placeholder="e.g. /path/to/your/document.docx")
@@ -46,11 +46,15 @@ if st.button("Process Files"):
             logging.info(f"Processing Excel file: {file_path} and Word file: {word_file}")
 
             # Call the main function with the provided file path, sheet name, and word file
-            main(file_path, sheet_name, word_file)
+            result = main(file_path, sheet_name, word_file)
 
-            # Success message
-            st.success("Files processed successfully!")
-            logging.info("Files processed successfully")
+            # If no exception occurs, display success
+            if result:
+                st.success("Files processed successfully!")
+                logging.info("Files processed successfully")
+            else: 
+                st.error("There's an error in Filename, Sheet name or in the code")
+                logging.error("An error has occured")
 
         except FileNotFoundError as fnf_error:
             st.error(f"File not found: {fnf_error}")
@@ -61,8 +65,9 @@ if st.button("Process Files"):
             logging.error(f"Validation error: {ve_error}")
 
         except Exception as e:
-            st.error(f"An unexpected error occurred: {str(e)}")
+            # Log the full stack trace in the log and show a user-friendly message on the front end
             logging.exception(f"Error processing files: {str(e)}")
+            st.error(f"Error processing file: {str(e)}")
 
     else:
         st.warning("Please provide both the file path and sheet name.")
