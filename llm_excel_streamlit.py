@@ -11,11 +11,68 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S"
 )
 
-# Set page configuration
-st.set_page_config(page_title="Excel and Word File Processor")
+# Set page configuration with custom favicon and layout
+st.set_page_config(page_title="Excel and Word File Processor", page_icon="📑", layout="centered")
+
+# Custom CSS for styling
+st.markdown("""
+    <style>
+    /* Background gradient */
+    body {
+        background: linear-gradient(to right, #141E30, #243B55);
+        color: #FF0000;
+    }
+    /* Center the main container */
+    .stApp {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    /* Title style */
+    h1 {
+        font-family: Arial, sans-serif;
+        font-size: 2.1em;
+        color: #f9f9f9;
+        text-shadow: 1px 1px 2px #000;
+    }
+    /* Input box styles */
+    .stTextInput, .stButton {
+        background: #2F2F2F;
+        color: #333;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+    }
+    /* Button style */
+    .stButton>button {
+        background-color: #6c63ff;
+        color: #fff;
+        font-weight: bold;
+        border: None;
+        border-radius: 8px;
+        transition: background-color 0.3s ease;
+    }
+    .stButton>button:hover {
+        background-color: #5548c8;
+    }
+    /* Card style */
+    .card {
+        background-color: #243B55;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
+    }
+    /* Increase font size for input labels */
+    .large-text {
+        font-size: 1.2em; /* Adjust this size as needed */
+        color: #f0f0f5; /* Change color for contrast */
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 # Title
-st.title("Excel and Word File Processor")
+st.title("📑 AI-Driven Requirement Insights Engine")
 
 # Function to validate file existence
 def validate_file(file_path):
@@ -24,17 +81,28 @@ def validate_file(file_path):
     if not os.path.isfile(file_path):
         raise ValueError(f"Provided path is not a file: {file_path}")
 
-# Text input for Excel file path
-file_path = st.text_input("Enter the file path for the Excel file", value="", placeholder="e.g. /path/to/your/excel.xlsx")
+# File input form in a card layout
+with st.container():
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    
+    # Larger font text labels
+    st.markdown('<p class="large-text">🔍 Enter the file path for the Excel file</p>', unsafe_allow_html=True)
+    st.text_input("", value="", placeholder="e.g. /path/to/your/excel.xlsx", key="excel_path")
 
-# Text input for sheet name
-sheet_name = st.text_input("Enter the sheet name", value="")
+    st.markdown('<p class="large-text">📄 Enter the sheet name</p>', unsafe_allow_html=True)
+    st.text_input("", value="",placeholder="e.g. Sheet1", key="sheet_name")
 
-# Text input for Word document data
-word_file = st.text_input("Enter the file path for the Word document (optional)", value="", placeholder="e.g. /path/to/your/document.docx")
+    st.markdown('<p class="large-text">📃 Enter the file path for the Word document</p>', unsafe_allow_html=True)
+    st.text_input("", value="", placeholder="e.g. /path/to/your/document.docx", key="word_file")
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # Button to execute the main function
-if st.button("Process Files"):
+if st.button("🚀 Process Files"):
+    file_path = st.session_state.get("excel_path", "")
+    sheet_name = st.session_state.get("sheet_name", "")
+    word_file = st.session_state.get("word_file", "")
+    
     if file_path and sheet_name:
         try:
             # Validate file paths
@@ -46,15 +114,11 @@ if st.button("Process Files"):
             logging.info(f"Processing Excel file: {file_path} and Word file: {word_file}")
 
             # Call the main function with the provided file path, sheet name, and word file
-            result = main(file_path, sheet_name, word_file)
+            main(file_path, sheet_name, word_file)
 
-            # If no exception occurs, display success
-            if result:
-                st.success("Files processed successfully!")
-                logging.info("Files processed successfully")
-            else: 
-                st.error("There's an error in Filename, Sheet name or in the code")
-                logging.error("An error has occured")
+            # Display success message
+            st.success("✅ Files processed successfully!")
+            logging.info("Files processed successfully")
 
         except FileNotFoundError as fnf_error:
             st.error(f"File not found: {fnf_error}")
@@ -70,5 +134,5 @@ if st.button("Process Files"):
             st.error(f"Error processing file: {str(e)}")
 
     else:
-        st.warning("Please provide both the file path and sheet name.")
+        st.warning("⚠️ Please provide both the file path and sheet name.")
         logging.warning("Missing file path or sheet name.")
