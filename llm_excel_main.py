@@ -68,7 +68,7 @@ def process_excel_requirements(file_path, sheet_name):
     sheet = workbook[sheet_name]
 
     # Loop through all rows, starting from row 2 (assuming row 1 is header)
-    for row in range(2, sheet.max_row + 1):
+    for row in range(7, sheet.max_row + 1):
         # Get the question from column B
         question = sheet[f"B{row}"].value
         
