@@ -1,6 +1,6 @@
 import streamlit as st 
 from langchain_core.messages import AIMessage, HumanMessage
-from testt1 import main
+from c2_proposal_writer import main
 import hydralit_components as hc
 
 if "chat_history" not in st.session_state:
@@ -13,7 +13,7 @@ st.title("Streaming Bot")
 for message in st.session_state.chat_history:
     if isinstance(message, HumanMessage):
         with st.chat_message("Human"):
-            st.markdown(message.content)
+            st.markdown(message.content) 
     else: 
         with st.chat_message("AI"):
             st.markdown(message.content)
