@@ -3,7 +3,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import StrOutputParser
-from data3 import standalone_question_process
+from proposal_writer_standalone import standalone_question_process
 from docx import Document
 from langchain_community.document_loaders import Docx2txtLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter 
@@ -14,14 +14,16 @@ import os
 from dotenv import load_dotenv
 from langchain_community.vectorstores.supabase import SupabaseVectorStore
 from langchain_openai import OpenAIEmbeddings,ChatOpenAI
+import logging
 
-openaiapikey = "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"
-sbapikey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6eHp1YXpzcHhqdGZ3ZXJvcWNnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDcyNTQ1OTYsImV4cCI6MjAyMjgzMDU5Nn0.BcbuKaBsdYcPta5GlVXQ8Wa9RSqFTtLDWAouG21Csfw'
+load_dotenv()
+openaiapikey = os.getenv("OPENAI_API_KEY")
+sbapikey = os.getenv("SUPABASE_API_KEY")  
 sburl = 'https://lzxzuazspxjtfweroqcg.supabase.co'
 supabase_client = create_client(sburl, sbapikey)
 
 load_dotenv()
-LANGCHAIN_API_KEY= "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"
+LANGCHAIN_API_KEY= os.getenv("LANGCHAIN_API_KEY")  
 LANGCHAIN_TRACING_V2="true"
 LANGCHAIN_ENDPOINT ="https://api.smith.langchain.com"
 LANGCHAIN_PROJECT = "langsmith"
@@ -54,7 +56,11 @@ def process_documents(all_outputs):
     
             output_string = "\n".join(output_lines)
             return output_string
-
+def clear_vectorstore_documents():
+    try:
+        supabase_client.table("proposal_doc").delete().lt('id', 'ffffffff-ffff-ffff-ffff-ffffffffffff').execute()
+    except Exception as e:
+        logging.error(f"Error clearing documents from vector store: {e}")
 
 def main(question):
 
@@ -76,12 +82,13 @@ def main(question):
         all_outputs = load_and_split(file_paths)
         out = process_documents(all_outputs)
 
-        # SupabaseVectorStore.from_documents(
-        #     all_outputs,
-        #     OpenAIEmbeddings(openai_api_key=openaiapikey),
-        #     client=supabase_client,
-        #     table_name='documents'
-        # )
+        clear_vectorstore_documents()
+        SupabaseVectorStore.from_documents(
+            all_outputs,
+            OpenAIEmbeddings(openai_api_key=openaiapikey),
+            client=supabase_client,
+            table_name='proposal_doc'
+        )
 
         # question = "Write a description about how C2 technologies have implemented change management process for the US Air Force in a detailed manner. Answer in 1000 words."
         resp = None
