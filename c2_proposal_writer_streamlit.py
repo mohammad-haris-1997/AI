@@ -1,6 +1,6 @@
 import streamlit as st 
 from langchain_core.messages import AIMessage, HumanMessage
-from c2_proposal_writer import main
+from c2_proposal_writer_main import main
 import hydralit_components as hc
 
 if "chat_history" not in st.session_state:
@@ -57,7 +57,6 @@ if user_query is not None and user_query.strip() != "":
                     st.markdown(response_generator)
                     full_response = response_generator
 
-        # After receiving the full response, update the chat history
             st.session_state.chat_history.append(AIMessage(full_response))
 
 
