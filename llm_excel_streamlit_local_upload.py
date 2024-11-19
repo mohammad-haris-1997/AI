@@ -2,6 +2,7 @@ import streamlit as st
 from prod_llm_excel_main_local_upload import main 
 import io
 import logging
+import base64
 
 logging.basicConfig(
     filename="excel_processor.log", 
@@ -63,6 +64,7 @@ st.markdown("""
     /* Card style */
     .card {
         margin-top: 20px;
+        margin-left: 100px;
         width: 90%;
         max-width: 500px;
         background-color: #243B55;
@@ -75,6 +77,24 @@ st.markdown("""
         font-size: 1.2em; /* Adjust this size as needed */
         color: #f0f0f5; /* Change color for contrast */
     }
+
+   .left-links {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .left-links a {
+        text-decoration: none;
+        font-size: 16px;
+        font-weight: bold;
+        color: #007BFF;
+        margin-bottom: 10px;
+    }
+    .left-links a:hover {
+        color: #0056b3;
+        text-decoration: underline;
+    }
+   
     @media (max-width: 768px) {
     .card {
         width: 95%;  /* Increase width on smaller screens for better use of space */
@@ -85,8 +105,30 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Title
 st.title("AI -Driven Requirement Insights Engine")
+
+
+word_file_path = "/Users/mohammadharis/Downloads/Guidelines_for_the_Excel_Sheet_Setup.docx"
+excel_file_path = "/Users/mohammadharis/Downloads/ACTSII_CapsMatrix_CompanyName_Blank.xlsx"
+
+def create_download_link(file_path, file_label):
+    with open(file_path, "rb") as file:
+        file_data = file.read()
+        b64 = base64.b64encode(file_data).decode()
+        file_extension = file_path.split(".")[-1]
+        return f'<a href="data:application/{file_extension};base64,{b64}" download="{file_path}">{file_label}</a>'
+
+
+st.markdown(
+f"""
+    <div class="left-links">
+        {create_download_link(word_file_path, "📄File Format Requirements")}
+        {create_download_link(excel_file_path, "📊 Click Here to Download Sample Excel Workbook")}
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
 with st.container():
     uploaded_file = st.file_uploader("Upload an Excel file", type=["xlsx"])
     sheet_name = st.text_input("Enter the sheet name to process")
@@ -96,8 +138,9 @@ if st.button("🚀 Process File"):
     if uploaded_file and sheet_name:
         excel_data = io.BytesIO(uploaded_file.read())
         word_data = io.BytesIO(uploaded_word_doc.read()) if uploaded_word_doc else None
-        processed_data = main(excel_data, sheet_name, word_data)
         
+        with st.spinner("Please wait while the files are being processed..."):
+                    processed_data = main(excel_data, sheet_name, word_data)
         if processed_data:
             st.download_button(
                 label="Download Updated Excel File",
