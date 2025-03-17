@@ -5,7 +5,7 @@ from langchain_core.output_parsers import StrOutputParser
 from supabase import create_client
 
 
-openaiapikey = "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"
+openaiapikey = os.getenv("OPENAI_API_KEY")
 sbapikey = 'SUPABASE_KEY '
 sburl = 'SUPABASE_URL '
 supabase_client = create_client(sburl, sbapikey)
