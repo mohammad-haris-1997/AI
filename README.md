@@ -8,18 +8,6 @@ This project aims to build an Artificial Intelligence (AI) and Large Language Mo
 
 
 
-## Acknowledgements
-
- - DAEN 690 - 008: Data Analytics Engineering Project
- - Professor: Isaac Gang
-## Authors
-**Team KnowledgeBlend AI:**
-* Nafisa Ahmed (nahmed@gmu.edu)
-* Jaswanth Erusu (jerusu@gmu.edu)
-* Eshwari Gone (egone@gmu.edu)
-* Mohammad Haris (m2@gmu.edu)
-* Rithwik Reddy Nathi (rnathi@gmu.edu)
-* Gayasri Subburayalu (gsubbura@gmu.edu)
 
 
 
