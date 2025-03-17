@@ -6,8 +6,8 @@ from supabase import create_client
 
 
 openaiapikey = os.getenv("OPENAI_API_KEY")
-sbapikey = 'SUPABASE_KEY '
-sburl = 'SUPABASE_URL '
+sbapikey = os.getenv("SUPABASE_API_KEY")  
+sburl = 'https://lzxzuazspxjtfweroqcg.supabase.co'
 supabase_client = create_client(sburl, sbapikey)
 
 
