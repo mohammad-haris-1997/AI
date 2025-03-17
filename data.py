@@ -3,8 +3,9 @@ from langchain_openai import OpenAIEmbeddings, OpenAI,ChatOpenAI
 from langchain_core.prompts import PromptTemplate, ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from supabase import create_client
+import os
 
-
+load_dotenv()
 openaiapikey = os.getenv("OPENAI_API_KEY")
 sbapikey = os.getenv("SUPABASE_API_KEY")  
 sburl = 'https://lzxzuazspxjtfweroqcg.supabase.co'
