@@ -15,8 +15,8 @@ import requests
 from pprint import pprint
 
 openaiapikey = os.getenv("OPENAI_API_KEY")
-sbapikey = 'SUPABASE_KEY'
-sburl = 'SUPABASE_URL'
+sbapikey = os.getenv("SUPABASE_API_KEY")  
+sburl = 'https://lzxzuazspxjtfweroqcg.supabase.co'
 supabase_client = create_client(sburl, sbapikey)
 
 async def process_text_file(path):
