@@ -13,7 +13,9 @@ import re
 import xml.etree.ElementTree as ET
 import requests
 from pprint import pprint
+import os
 
+load_dotenv()
 openaiapikey = os.getenv("OPENAI_API_KEY")
 sbapikey = os.getenv("SUPABASE_API_KEY")  
 sburl = 'https://lzxzuazspxjtfweroqcg.supabase.co'
